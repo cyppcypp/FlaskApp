@@ -3,8 +3,8 @@ FROM python:3.10
 WORKDIR /app
 
 # Copier les fichiers
-COPY requirements.txt requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+COPY requirement.txt requirement.txt
+RUN pip install --no-cache-dir -r requirement.txt
 
 COPY . .
 
