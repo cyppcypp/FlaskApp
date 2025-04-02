@@ -38,7 +38,7 @@ jobs:
 
       - name: Construire l'image Docker
         run: |
-          docker build -t monapp-flask .
+          docker build -t FlaskApp .
           
       - name: Se connecter à Docker Hub
         env:
@@ -49,8 +49,8 @@ jobs:
           
       - name: Pousser l'image sur Docker Hub
         run: |
-          docker tag monapp-flask $DOCKER_USER/monapp-flask:latest
-          docker push $DOCKER_USER/monapp-flask:latest
+          docker tag monapp-flask $DOCKER_USER/FlaskApp:latest
+          docker push $DOCKER_USER/FlaskApp:latest
 
   notify:
     runs-on: ubuntu-latest
