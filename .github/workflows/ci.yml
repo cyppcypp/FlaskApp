@@ -2,74 +2,59 @@ name: CI Pipeline
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
-    branches:
-      - main
+    branches: [main]
 
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: Récupérer le code
-        uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-      - name: Configurer Python
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
+          python-version: '3.10'
 
-      - name: Installer les dépendances
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirement.txt
+          pip install -r requirements.txt
 
-      - name: Lancer les tests
-        run: |
-          pytest test_app.py
-          
-  docker-build:
-    runs-on: ubuntu-latest
-    needs: test 
-    steps:
-      - name: Récupérer le code
-        uses: actions/checkout@v4
+      - name: Run tests
+        run: pytest
 
-      - name: Construire l'image Docker
-        run: |
-          docker build -t flaskapp .
-
-      - name: Afficher l'utilisateur Docker
-        run: echo "Docker user is $DOCKER_USER"
-          
-      - name: Se connecter à Docker Hub
-        env:
-          DOCKER_USER: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-        run: |
-          echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USER" --password-stdin
-          
-      - name: Pousser l'image sur Docker Hub
-        run: |
-          docker tag flaskapp $DOCKER_USER/flaskapp:latest
-          docker push $DOCKER_USER/flaskapp:latest
-
-  notify:
-    runs-on: ubuntu-latest
+  docker:
     needs: test  
-    if: failure()  
+    runs-on: ubuntu-latest
     steps:
-      - name: Envoyer un email en cas d'échec
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Build Docker image
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/flaskapp:latest .
+
+      - name: Push Docker image
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/flaskapp:latest
+
+  notify-on-failure:
+    needs: test
+    if: failure()  # Exécute seulement si "test" échoue
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send email notification
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: smtp.gmail.com
-          server_port: 465
-          username: ${{ secrets.MAIL_USERNAME }}
-          password: ${{ secrets.MAIL_PASSWORD }}
-          subject: "🚨 Tests échoués sur GitHub Actions"
-          body: "Les tests unitaires ont échoué sur la branche main. Vérifiez les logs !"
-          to: "cypri.berth@gmail.com"
-          from: "CI/CD Bot"
-
-
+          server_port: 587
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: "🚨 CI/CD Pipeline Failed!"
+          body: "Les tests ont échoué. Vérifiez GitHub Actions pour voir les logs."
+          to: "cyprien.berthelot@edu.ece.fr"
+          from: "GitHub Actions"
