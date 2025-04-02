@@ -49,7 +49,7 @@ jobs:
           
       - name: Pousser l'image sur Docker Hub
         run: |
-          docker tag monapp-flask $DOCKER_USER/flaskapp:latest
+          docker tag flaskapp $DOCKER_USER/flaskapp:latest
           docker push $DOCKER_USER/flaskapp:latest
 
   notify:
