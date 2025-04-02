@@ -58,7 +58,7 @@ jobs:
   notify:
     runs-on: ubuntu-latest
     needs: test  
-    if: failure()  
+    if: failed()  
     steps:
       - name: Envoyer un email en cas d'échec
         uses: dawidd6/action-send-mail@v3
