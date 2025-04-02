@@ -47,7 +47,7 @@ jobs:
         run: |
           echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USER" --password-stdin
           
-      - name: Pousser l’image sur Docker Hub
+      - name: Pousser l'image sur Docker Hub
         run: |
           docker tag monapp-flask $DOCKER_USER/monapp-flask:latest
           docker push $DOCKER_USER/monapp-flask:latest
