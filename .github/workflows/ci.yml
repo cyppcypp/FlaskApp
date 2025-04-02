@@ -39,6 +39,9 @@ jobs:
       - name: Construire l'image Docker
         run: |
           docker build -t flaskapp .
+
+      - name: Afficher l'utilisateur Docker
+        run: echo "Docker user is $DOCKER_USER"
           
       - name: Se connecter à Docker Hub
         env:
